@@ -120,7 +120,8 @@ function afterTranslateTextEdit(beforeEditText) {
     .replaceAll(
       "// :back-cover-image: image:./images/covers/back-coverEN_A5.pdf[]",
       ":back-cover-image: image:./images/covers/back-coverEN_A5.pdf[]"
-    );
+    )
+    .replaceAll("<<_", "<<");
 
   return afterEditText;
 }
@@ -173,7 +174,7 @@ async function docTranslate() {
 
 const win = new QMainWindow();
 win.setWindowTitle("Google API tanslate");
-win.setMinimumSize(300, 100);
+win.setMinimumSize(340, 100);
 
 const centralWidget = new QWidget();
 centralWidget.setObjectName("myroot");
@@ -260,14 +261,25 @@ win.addEventListener(WidgetEventTypes.Drop, (e) => {
     let str = url.toString();
     // console.log("url", str); //Example of inspection of dropped data.
     fileName = str.replace("file:///", "");
-    dirName = path.dirname(fileName);
-    extName = path.extname(fileName);
-    baseName = path.basename(fileName).replace(`${extName}`, "");
-    console.log(`${dirName}/${baseName}${extName}`);
-    console.log(extName);
-    translateTextWithGlossary();
-    console.log("file");
-    if (extName === "") {
+
+    function nameInputer(dir) {
+      dirName = path.dirname(dir).replaceAll("\\", "/");
+      extName = path.extname(dir);
+      baseName = path.basename(dir).replace(`${extName}`, "");
+      text = fs.readFileSync(dir, "utf-8");
+    }
+
+    nameInputer(fileName);
+
+    if (path.basename(fileName).includes("_en"))
+      label.setText("파일명에 _en 이 포함되지 않아야 합니다.");
+
+    if (extName !== "" && !path.basename(fileName).includes("_en")) {
+      console.log(`${dirName}/${baseName}${extName}`);
+      console.log(extName);
+      translateTextWithGlossary();
+      console.log("file");
+    } else if (extName === "") {
       // console.log("folder");
 
       function generateComponents(dir) {
@@ -288,13 +300,6 @@ win.addEventListener(WidgetEventTypes.Drop, (e) => {
       }
       generateComponents(fileName);
 
-      function nameInputer(dir) {
-        dirName = path.dirname(dir).replaceAll("\\", "/");
-        extName = path.extname(dir);
-        baseName = path.basename(dir).replace(`${extName}`, "");
-        text = fs.readFileSync(dir, "utf-8");
-      }
-
       async function dirTranslate() {
         for (let i = 0; i < listArr.length; i++) {
           nameInputer(listArr[i]);
@@ -305,9 +310,6 @@ win.addEventListener(WidgetEventTypes.Drop, (e) => {
       dirTranslate();
 
       console.log("finished");
-    }
-
-    if (extName !== "") {
     }
   }
 });
