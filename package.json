@@ -11,6 +11,7 @@
     "debug": "webpack && qode --inspect ./dist/index.js"
   },
   "dependencies": {
+    "@google-cloud/storage": "^5.14.0",
     "@google-cloud/translate": "^6.2.7",
     "@nodegui/nodegui": "^0.36.0",
     "googleapis": "^84.0.0"

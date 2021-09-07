@@ -9,25 +9,14 @@ import {
   FlexLayout,
   QPushButton,
   QIcon,
+  QFileDialog,
+  QGridLayout,
 } from "@nodegui/nodegui";
-import { file } from "googleapis/build/src/apis/file";
+import { afterTranslateTextEdit } from "./func/afterTranslateTextEdit";
 import logo from "../assets/logox200.png";
+import logo_excel from "../assets/file-excel-2-line.svg";
 
 //
-
-// == Google translate ==
-
-/// txt ///
-
-/**
- * TODO(developer): Uncomment these variables before running the sample.
- */
-const projectId = "single-kayak-323502";
-const location = "us-central1";
-const glossaryId = "ascii_manual-ko-en";
-const keyFilename = "./key/single-kayak-323502-3376f2f211f4.json";
-const fs = require("fs");
-const path = require("path");
 
 let text;
 let fileName = "";
@@ -35,8 +24,20 @@ let dirName = "";
 let baseName = "";
 let extName = "";
 let listArr = [];
+let gloDir;
+let gloBase;
+let gloExt;
 
-// console.log(fileName);
+// == Google translate ==
+
+/// txt ///
+const bucketName = "ascii_manual_us";
+const projectId = "single-kayak-323502";
+const location = "us-central1";
+let glossaryId;
+const keyFilename = "./key/single-kayak-323502-3376f2f211f4.json";
+const fs = require("fs");
+const path = require("path");
 
 // Imports the Google Cloud Translation library
 const { TranslationServiceClient } = require("@google-cloud/translate");
@@ -94,79 +95,9 @@ async function translateTextWithGlossary() {
 
 //
 
-// 번역된 텍스트 후보정
-function afterTranslateTextEdit(beforeEditText) {
-  let afterEditText;
-  afterEditText = beforeEditText
-    .replaceAll(":imagesdir:doc", ":imagesdir: doc")
-    .replaceAll(":icon_dir:image", ":icon_dir: image")
-    .replaceAll(
-      "include::doc\\000_preface\\preface.adoc[]",
-      "include::doc\\000_preface\\preface_en.adoc[]"
-    )
-    .replaceAll("doc.adoc[leveloffset=+1]", "doc_en.adoc[leveloffset=+1]")
-    .replaceAll(
-      ":title-page-background-image: image:./images/covers/title-bg_A5.png[]",
-      "// :title-page-background-image: image:./images/covers/title-bg_A5.png[]"
-    )
-    .replaceAll(
-      ":back-cover-image: image:./images/covers/back-cover_A5.pdf[]",
-      "// :back-cover-image: image:./images/covers/back-cover_A5.pdf[]"
-    )
-    .replaceAll(
-      "// :title-page-background-image: image:./images/covers/title-bgEN_A5.png[]",
-      ":title-page-background-image: image:./images/covers/title-bgEN_A5.png[]"
-    )
-    .replaceAll(
-      "// :back-cover-image: image:./images/covers/back-coverEN_A5.pdf[]",
-      ":back-cover-image: image:./images/covers/back-coverEN_A5.pdf[]"
-    )
-    .replaceAll("<<_", "<<");
-
-  return afterEditText;
-}
-
 //
 
-/// doc
-//// 클라우드 안에서만 가능 (gs://)
-/*
-async function docTranslate() {
-  const { TranslationServiceClient } =
-    require("@google-cloud/translate").v3beta1;
-
-  // Instantiates a client
-  const translationClient = new TranslationServiceClient({
-    projectId,
-    keyFilename,
-  });
-
-  const documentInputConfig = {
-    gcsSource: {
-      inputUri: fileName,
-    },
-  };
-
-  async function translateDocument() {
-    // Construct request
-    const request = {
-      parent: translationClient.locationPath(projectId, location),
-      documentInputConfig: documentInputConfig,
-      sourceLanguageCode: "ko",
-      targetLanguageCode: "us",
-    };
-
-    // Run request
-    const [response] = await translationClient.translateDocument(request);
-
-    console.log(
-      `Response: Mime Type - ${response.documentTranslation.mimeType}`
-    );
-  }
-
-  translateDocument();
-}
-*/
+// Google Storage
 
 //
 
@@ -174,10 +105,11 @@ async function docTranslate() {
 
 const win = new QMainWindow();
 win.setWindowTitle("Google API tanslate");
-win.setMinimumSize(340, 100);
+win.setMinimumSize(340, 120);
 
 const centralWidget = new QWidget();
 centralWidget.setObjectName("myroot");
+
 const rootLayout = new FlexLayout();
 centralWidget.setLayout(rootLayout);
 
@@ -185,16 +117,154 @@ const label = new QLabel();
 label.setObjectName("mylabel");
 label.setText("Drag to here.");
 
-const button = new QPushButton();
-button.setIcon(new QIcon(logo));
-
-const label2 = new QLabel();
-label2.setText("111");
-label2.setInlineStyle(`
-  color: red;
-`);
-
 rootLayout.addWidget(label);
+
+//
+
+// Glossary 파일 업로드
+const button = new QPushButton(centralWidget);
+button.setObjectName("mybutton");
+button.setIcon(new QIcon(logo_excel));
+button.setText("Add glossary");
+let buttonSize = 120;
+button.setFixedSize(buttonSize, 25);
+
+button.addEventListener("clicked", () => {
+  console.log("the button was clicked");
+  const fileDialog = new QFileDialog();
+  // fileDialog.setFileMode(FileMode.AnyFile);
+  fileDialog.setNameFilter("Glossary file (*.csv)");
+  fileDialog.exec();
+
+  const selectedFiles = fileDialog.selectedFiles();
+  console.log(path.dirname(selectedFiles[0].toString()));
+  //C:/Users/AA19103/Desktop
+  console.log(path.basename(selectedFiles[0].toString()));
+  //ascii_manual-ko-en.csv
+  console.log(path.extname(selectedFiles[0].toString()));
+  //.csv
+
+  gloDir = path.dirname(selectedFiles[0].toString().replaceAll("\\", "/"));
+  gloBase = path.basename(selectedFiles[0].toString().replaceAll("\\", "/"));
+  gloExt = path.extname(selectedFiles[0].toString().replaceAll("\\", "/"));
+  //
+
+  function main() {
+    const filePath = `${gloDir}/${gloBase}`;
+    const destFileName = `${gloBase}`;
+    const { Storage } = require("@google-cloud/storage");
+    const storage = new Storage({ projectId, keyFilename });
+    async function uploadFile() {
+      await storage.bucket(bucketName).upload(filePath, {
+        destination: destFileName,
+      });
+      console.log(`${filePath} uploaded to ${bucketName}`);
+    }
+    uploadFile().catch(console.error);
+  }
+  main();
+
+  //
+
+  //
+
+  // glossary 업데이트
+  glossaryId = gloBase.replace(gloExt, "");
+
+  //// glossary 확인
+  async function listGlossaries() {
+    // Construct request
+    const request = {
+      parent: `projects/${projectId}/locations/${location}`,
+    };
+
+    // Run request
+    const [response] = await translationClient.listGlossaries(request);
+
+    let beforeGlo;
+    for (const glossary of response) {
+      console.log(`Name: ${glossary.name}`);
+      beforeGlo = `${glossary.name}`;
+      console.log(`Entry count: ${glossary.entryCount}`);
+      console.log(`Input uri: ${glossary.inputConfig.gcsSource.inputUri}`);
+      for (const languageCode of glossary.languageCodesSet.languageCodes) {
+        console.log(`Language code: ${languageCode}`);
+      }
+    }
+    // console.table(response);
+    return beforeGlo;
+  }
+
+  async function deleteGlossary() {
+    // Construct request
+    const request = {
+      parent: `projects/${projectId}/locations/${location}`,
+      name: `projects/${projectId}/locations/${location}/glossaries/${glossaryId}`,
+    };
+
+    // Delete glossary using a long-running operation
+    const [operation] = await translationClient.deleteGlossary(request);
+
+    // Wait for operation to complete.
+    const [response] = await operation.promise();
+
+    console.log(`Deleted glossary: ${response.name}`);
+  }
+
+  //// glossary 생성
+
+  async function createGlossary() {
+    // Construct glossary
+    const glossary = {
+      languageCodesSet: {
+        languageCodes: ["ko", "en"],
+      },
+      inputConfig: {
+        gcsSource: {
+          inputUri: `gs://${bucketName}/${gloBase}`,
+        },
+      },
+      name: `projects/${projectId}/locations/${location}/glossaries/${glossaryId}`,
+    };
+
+    // Construct request
+    const request = {
+      parent: `projects/${projectId}/locations/${location}`,
+      glossary: glossary,
+    };
+
+    // Create glossary using a long-running operation
+    const [operation] = await translationClient.createGlossary(request);
+
+    // Wait for the operation to complete
+    await operation.promise();
+
+    console.log("Created glossary:");
+    console.log(`InputUri ${request.glossary.inputConfig.gcsSource.inputUri}`);
+  }
+
+  const updateGlossary = async () => {
+    const beforeGloName = await listGlossaries();
+    if (beforeGloName !== undefined && beforeGloName.includes(glossaryId))
+      await deleteGlossary();
+    console.log(beforeGloName);
+    console.log(glossaryId);
+    await createGlossary();
+  };
+
+  updateGlossary();
+
+  //
+});
+
+const button2 = new QPushButton(centralWidget);
+button2.setObjectName("mybutton2");
+button2.setIcon(new QIcon(logo));
+button2.setText("func2");
+button2.setFixedSize(80, 25);
+button2.move(buttonSize + 1, 0);
+
+// centralWidget.setLayout(button);
 
 // rootLayout.addWidget(button);
 // rootLayout.addWidget(label2);
@@ -204,20 +274,28 @@ win.setStyleSheet(
   `
     #myroot {
       background-color: #eeeeee;
-      height: '100%';
       align-items: 'center';
       justify-content: 'center';
     }
     #mylabel {
       font-size: 16px;
       font-weight: bold;
-      padding: 5;
+    }
+    #mybutton {
+      font-size: 12px;
+      font-weight: regular;
+    }
+    #mybutton2 {
+      font-size: 12px;
+      font-weight: regular;
     }
   `
 );
 
-win.setAcceptDrops(true);
+//
 
+// 드롭 파일 번역
+win.setAcceptDrops(true);
 win.addEventListener(WidgetEventTypes.DragEnter, (e) => {
   let ev = new QDragMoveEvent(e);
   console.log("dragEnter", ev.proposedAction());
