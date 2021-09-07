@@ -28,9 +28,9 @@ let gloDir;
 let gloBase;
 let gloExt;
 
-// == Google translate ==
+//
 
-/// txt ///
+//// == Google translate ==
 const bucketName = "ascii_manual_us";
 const projectId = "single-kayak-323502";
 const location = "us-central1";
@@ -90,19 +90,12 @@ async function translateTextWithGlossary() {
   }
   editSecond();
 
-  label.setText("Drag to here.");
+  label.setText("Completed. Drag to here to translate.");
 }
 
 //
 
-//
-
-// Google Storage
-
-//
-
-// == nodegui ==
-
+//// nodegui
 const win = new QMainWindow();
 win.setWindowTitle("Google API tanslate");
 win.setMinimumSize(340, 120);
@@ -115,13 +108,13 @@ centralWidget.setLayout(rootLayout);
 
 const label = new QLabel();
 label.setObjectName("mylabel");
-label.setText("Drag to here.");
+label.setText("Add glossary first");
 
 rootLayout.addWidget(label);
 
 //
 
-// Glossary 파일 업로드
+// glossary 파일 업로드
 const button = new QPushButton(centralWidget);
 button.setObjectName("mybutton");
 button.setIcon(new QIcon(logo_excel));
@@ -144,10 +137,9 @@ button.addEventListener("clicked", () => {
   console.log(path.extname(selectedFiles[0].toString()));
   //.csv
 
-  gloDir = path.dirname(selectedFiles[0].toString().replaceAll("\\", "/"));
-  gloBase = path.basename(selectedFiles[0].toString().replaceAll("\\", "/"));
-  gloExt = path.extname(selectedFiles[0].toString().replaceAll("\\", "/"));
-  //
+  gloDir = path.dirname(selectedFiles[0].toString());
+  gloBase = path.basename(selectedFiles[0].toString());
+  gloExt = path.extname(selectedFiles[0].toString());
 
   function main() {
     const filePath = `${gloDir}/${gloBase}`;
@@ -166,12 +158,10 @@ button.addEventListener("clicked", () => {
 
   //
 
-  //
-
-  // glossary 업데이트
+  // glossary 이름 업데이트
   glossaryId = gloBase.replace(gloExt, "");
 
-  //// glossary 확인
+  // glossary 확인
   async function listGlossaries() {
     // Construct request
     const request = {
@@ -207,12 +197,12 @@ button.addEventListener("clicked", () => {
 
     // Wait for operation to complete.
     const [response] = await operation.promise();
-
     console.log(`Deleted glossary: ${response.name}`);
   }
 
-  //// glossary 생성
+  //
 
+  // glossary 생성
   async function createGlossary() {
     // Construct glossary
     const glossary = {
@@ -243,20 +233,26 @@ button.addEventListener("clicked", () => {
     console.log(`InputUri ${request.glossary.inputConfig.gcsSource.inputUri}`);
   }
 
+  // glossary 업데이트
   const updateGlossary = async () => {
+    label.setText("Adding...");
     const beforeGloName = await listGlossaries();
-    if (beforeGloName !== undefined && beforeGloName.includes(glossaryId))
+    label.setText("Check List...");
+    if (beforeGloName !== undefined && beforeGloName.includes(glossaryId)) {
       await deleteGlossary();
+      label.setText("Delete existing glossary...");
+    }
     console.log(beforeGloName);
     console.log(glossaryId);
     await createGlossary();
+    label.setText("Completed. Drag to here to translate.");
   };
-
   updateGlossary();
-
-  //
 });
 
+//
+
+// 버튼2
 const button2 = new QPushButton(centralWidget);
 button2.setObjectName("mybutton2");
 button2.setIcon(new QIcon(logo));
@@ -264,11 +260,9 @@ button2.setText("func2");
 button2.setFixedSize(80, 25);
 button2.move(buttonSize + 1, 0);
 
-// centralWidget.setLayout(button);
+//
 
-// rootLayout.addWidget(button);
-// rootLayout.addWidget(label2);
-
+// 스타일
 win.setCentralWidget(centralWidget);
 win.setStyleSheet(
   `
@@ -327,7 +321,6 @@ win.addEventListener(WidgetEventTypes.DragLeave, (e) => {
   let ev = new QDragLeaveEvent(e);
   ev.ignore(); //Ignore the event when it leaves
   console.log("ignored", ev);
-  label.setText("Drag to here.");
 });
 win.addEventListener(WidgetEventTypes.Drop, (e) => {
   let dropEvent = new QDropEvent(e);
