@@ -1,0 +1,5 @@
+== About
+node.js nodegui 활용 Google translate API 호출 어플리케이션
+
+== 메인 소스
+./src/index.js

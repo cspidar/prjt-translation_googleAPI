@@ -3,5 +3,4 @@ dist/
 *.log
 .vscode
 key/
-*.adoc
 deploy/
