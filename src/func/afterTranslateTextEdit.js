@@ -1,6 +1,21 @@
 // 번역된 텍스트 후보정
 export function afterTranslateTextEdit(beforeEditText) {
   let afterEditText;
+  // const headingSentence = new RegExp("^==.*");
+  const spaceAfterLetter = /(?<==+.*(?<=\s))[A-Za-z]/g;
+
+  // const notListButBold = new RegExp("(?<=[\\<&\\*])\\s(?=[A-Za-z]{2,}\\*/g)");
+
+  // beforeEditText.replace(notListButBold, "");
+
+  // beforeEditText.replace(spaceAfterLetter, () => {
+  //   if (spaceAfterLetter && headingSentence) return /[A-Z]/;
+  // });
+
+  beforeEditText = beforeEditText.replace(spaceAfterLetter, (p) =>
+    p.toUpperCase()
+  );
+
   afterEditText = beforeEditText
     .replaceAll(":imagesdir:doc", ":imagesdir: doc")
     .replaceAll(":icon_dir:image", ":icon_dir: image")

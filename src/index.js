@@ -357,13 +357,11 @@ win.addEventListener(WidgetEventTypes.Drop, (e) => {
           if (fs.lstatSync(fullPath).isDirectory()) {
             // console.log(`directory: ${fullPath}`);
             generateComponents(fullPath);
-          } else {
-            if (
-              path.extname(fullPath) === ".adoc" &&
-              !path.basename(fullPath).includes("_en")
-            ) {
-              listArr.push(fullPath);
-            }
+          } else if (
+            path.extname(fullPath) === ".adoc" &&
+            !path.basename(fullPath).includes("_en")
+          ) {
+            listArr.push(fullPath);
           }
         });
       }
@@ -372,20 +370,21 @@ win.addEventListener(WidgetEventTypes.Drop, (e) => {
           dirName = path.dirname(listArr[i]).replaceAll("\\", "/");
           extName = path.extname(listArr[i]);
           baseName = path.basename(listArr[i]).replace(`${extName}`, "");
+          text = fs.readFileSync(`${dirName}/${baseName}${extName}`, "utf-8");
 
           console.log(fileName, dirName, baseName, extName);
           await translateTextWithGlossary();
         }
-        listArr = [];
-        fileName = "";
-        dirName = "";
-        baseName = "";
-        extName = "";
       }
 
       const urlTranslate = async () => {
         generateComponents(fileName);
         await dirTranslate();
+        listArr = [];
+        fileName = "";
+        dirName = "";
+        baseName = "";
+        extName = "";
       };
 
       urlTranslate();
