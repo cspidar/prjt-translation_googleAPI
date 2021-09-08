@@ -233,6 +233,8 @@ button.addEventListener("clicked", () => {
     console.log(`InputUri ${request.glossary.inputConfig.gcsSource.inputUri}`);
   }
 
+  //
+
   // glossary 업데이트
   const updateGlossary = async () => {
     label.setText("Adding...");
@@ -332,27 +334,23 @@ win.addEventListener(WidgetEventTypes.Drop, (e) => {
     let str = url.toString();
     // console.log("url", str); //Example of inspection of dropped data.
     fileName = str.replace("file:///", "");
-
-    function nameInputer(dir) {
-      dirName = path.dirname(dir).replaceAll("\\", "/");
-      extName = path.extname(dir);
-      baseName = path.basename(dir).replace(`${extName}`, "");
-      text = fs.readFileSync(dir, "utf-8");
-    }
-
-    nameInputer(fileName);
+    dirName = path.dirname(fileName).replaceAll("\\", "/");
+    extName = path.extname(fileName);
+    baseName = path.basename(fileName).replace(`${extName}`, "");
 
     if (path.basename(fileName).includes("_en"))
       label.setText("파일명에 _en 이 포함되지 않아야 합니다.");
 
     if (extName !== "" && !path.basename(fileName).includes("_en")) {
+      text = fs.readFileSync(fileName, "utf-8");
       console.log(`${dirName}/${baseName}${extName}`);
       console.log(extName);
       translateTextWithGlossary();
       console.log("file");
-    } else if (extName === "") {
-      // console.log("folder");
+    }
 
+    if (extName === "") {
+      // console.log("folder");
       function generateComponents(dir) {
         fs.readdirSync(dir).forEach((file) => {
           let fullPath = path.join(dir, file);
@@ -369,16 +367,28 @@ win.addEventListener(WidgetEventTypes.Drop, (e) => {
           }
         });
       }
-      generateComponents(fileName);
-
       async function dirTranslate() {
         for (let i = 0; i < listArr.length; i++) {
-          nameInputer(listArr[i]);
+          dirName = path.dirname(listArr[i]).replaceAll("\\", "/");
+          extName = path.extname(listArr[i]);
+          baseName = path.basename(listArr[i]).replace(`${extName}`, "");
+
           console.log(fileName, dirName, baseName, extName);
           await translateTextWithGlossary();
         }
+        listArr = [];
+        fileName = "";
+        dirName = "";
+        baseName = "";
+        extName = "";
       }
-      dirTranslate();
+
+      const urlTranslate = async () => {
+        generateComponents(fileName);
+        await dirTranslate();
+      };
+
+      urlTranslate();
 
       console.log("finished");
     }
