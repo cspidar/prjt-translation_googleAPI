@@ -2,22 +2,28 @@
 export function afterTranslateTextEdit(beforeEditText) {
   let afterEditText;
   // const headingSentence = new RegExp("^==.*");
-  const headingLine = /(?<==+).*/g;
+  const headingLineNoBracket = /(?<==+.*(?<=\s))\w*/g;
   const headingLetterAfterSpace = /(?<==+.*(?<=\s))[A-Za-z]/g;
-  const headingLetterAfterBracket = /(?<==+.*(?<=\())[A-Za-z]/g;
+  // const headingLetterAfterBracket = /(?<==+.*(?<=\())[A-Za-z]/g;
 
   // const plusSpaceAfterLetter = /(?<=\n\+ )[A-Za-z]/g;
   const plusSpaceLetter = /(?<=\n\+) (?=[A-Za-z])/g;
 
-  const firstLetter = /^.|(?<=\n)./g;
+  const firstLetter = /^[a-z]|(?<=\n)[a-z]|(?<=\n\.)[a-z]|(?<=\n\*\s)[a-z]/g;
 
-  beforeEditText = beforeEditText.replace(headingLine, (p) => p.toLowerCase());
+  beforeEditText = beforeEditText.replace(headingLineNoBracket, (p) =>
+    p.toLowerCase()
+  );
   beforeEditText = beforeEditText.replace(headingLetterAfterSpace, (p) =>
     p.toUpperCase()
   );
-  beforeEditText = beforeEditText.replace(headingLetterAfterBracket, (p) =>
-    p.toUpperCase()
-  );
+  // beforeEditText = beforeEditText.replace(headingLetterAfterBracket, (p) =>
+  //   p.toUpperCase()
+  // );
+
+  //
+
+  // \s 대신 공백으로 변경 - TEST 필요
   beforeEditText = beforeEditText
     .replaceAll(/\sOn\s/g, " on ")
     .replaceAll(/\sAnd\s/g, " and ")
@@ -32,6 +38,7 @@ export function afterTranslateTextEdit(beforeEditText) {
   beforeEditText = beforeEditText
     .replaceAll("Image:", "image:")
     .replaceAll("Menu:", "menu:")
+    .replaceAll("Include:", "include:")
     .replaceAll("Btn:", "btn:");
 
   beforeEditText = beforeEditText.replaceAll("‘", "`").replaceAll("’", "`");
@@ -65,7 +72,8 @@ export function afterTranslateTextEdit(beforeEditText) {
       "// :back-cover-image: image:./images/covers/back-coverEN_A5.pdf[]",
       ":back-cover-image: image:./images/covers/back-coverEN_A5.pdf[]"
     )
-    .replaceAll("<<_", "<<");
+    .replaceAll("<<_", "<<")
+    .replaceAll(`Options="header, Autowidth"`, `options="header, autowidth"`);
 
   return afterEditText;
 }
