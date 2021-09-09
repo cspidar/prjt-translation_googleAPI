@@ -2,19 +2,44 @@
 export function afterTranslateTextEdit(beforeEditText) {
   let afterEditText;
   // const headingSentence = new RegExp("^==.*");
-  const spaceAfterLetter = /(?<==+.*(?<=\s))[A-Za-z]/g;
+  const headingLine = /(?<==+).*/g;
+  const headingLetterAfterSpace = /(?<==+.*(?<=\s))[A-Za-z]/g;
+  const headingLetterAfterBracket = /(?<==+.*(?<=\())[A-Za-z]/g;
 
-  // const notListButBold = new RegExp("(?<=[\\<&\\*])\\s(?=[A-Za-z]{2,}\\*/g)");
+  // const plusSpaceAfterLetter = /(?<=\n\+ )[A-Za-z]/g;
+  const plusSpaceLetter = /(?<=\n\+) (?=[A-Za-z])/g;
 
-  // beforeEditText.replace(notListButBold, "");
+  const firstLetter = /^.|(?<=\n)./g;
 
-  // beforeEditText.replace(spaceAfterLetter, () => {
-  //   if (spaceAfterLetter && headingSentence) return /[A-Z]/;
-  // });
-
-  beforeEditText = beforeEditText.replace(spaceAfterLetter, (p) =>
+  beforeEditText = beforeEditText.replace(headingLine, (p) => p.toLowerCase());
+  beforeEditText = beforeEditText.replace(headingLetterAfterSpace, (p) =>
     p.toUpperCase()
   );
+  beforeEditText = beforeEditText.replace(headingLetterAfterBracket, (p) =>
+    p.toUpperCase()
+  );
+  beforeEditText = beforeEditText
+    .replaceAll(/\sOn\s/g, " on ")
+    .replaceAll(/\sAnd\s/g, " and ")
+    .replaceAll(/\sOr\s/g, " or ")
+    .replaceAll(/\sOf\s/g, " of ")
+    .replaceAll(/\sFor\s/g, " for ")
+    .replaceAll(/\sThrough\s/g, " through ");
+
+  beforeEditText = beforeEditText.replace(plusSpaceLetter, "\n");
+
+  beforeEditText = beforeEditText.replace(firstLetter, (p) => p.toUpperCase());
+  beforeEditText = beforeEditText
+    .replaceAll("Image:", "image:")
+    .replaceAll("Menu:", "menu:")
+    .replaceAll("Btn:", "btn:");
+
+  beforeEditText = beforeEditText.replaceAll("‘", "`").replaceAll("’", "`");
+  // beforeEditText = beforeEditText
+  //   .replaceAll("‘‘‘‘", "''''")
+  //   .replaceAll("‘‘‘", "'''")
+  //   .replaceAll("’’’’", "''''")
+  //   .replaceAll("’’’", "'''");
 
   afterEditText = beforeEditText
     .replaceAll(":imagesdir:doc", ":imagesdir: doc")
