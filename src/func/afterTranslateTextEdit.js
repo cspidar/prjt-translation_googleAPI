@@ -9,7 +9,8 @@ export function afterTranslateTextEdit(beforeEditText) {
   // const plusSpaceAfterLetter = /(?<=\n\+ )[A-Za-z]/g;
   const plusSpaceLetter = /(?<=\n\+) (?=[A-Za-z])/g;
 
-  const firstLetter = /^[a-z]|(?<=\n)[a-z]|(?<=\n\.)[a-z]|(?<=\n\*\s)[a-z]/g;
+  const firstLetter =
+    /^[a-z]|(?<=\n)[a-z]|(?<=\n\.)[a-z]|(?<=\n\*\s)[a-z]|(?<=\|\s)[a-z]|(?<=\|)[a-z]/g;
 
   beforeEditText = beforeEditText.replace(headingLineNoBracket, (p) =>
     p.toLowerCase()
