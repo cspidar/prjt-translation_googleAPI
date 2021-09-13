@@ -23,20 +23,23 @@ export function afterTranslateTextEdit(beforeEditText) {
 
   //
 
-  // \s 대신 공백으로 변경 - TEST 필요
+  // 헤딩 첫글자 대문자화에서 전치사 제외
   beforeEditText = beforeEditText
-    .replaceAll(/\sOn\s/g, " on ")
-    .replaceAll(/\sAnd\s/g, " and ")
-    .replaceAll(/\sOr\s/g, " or ")
-    .replaceAll(/\sOf\s/g, " of ")
-    .replaceAll(/\sFor\s/g, " for ")
-    .replaceAll(/\sThrough\s/g, " through ");
+    .replaceAll(/ On /g, " on ")
+    .replaceAll(/ And /g, " and ")
+    .replaceAll(/ Or /g, " or ")
+    .replaceAll(/ Of /g, " of ")
+    .replaceAll(/ For /g, " for ")
+    .replaceAll(/ Through /g, " through ");
 
   beforeEditText = beforeEditText.replace(plusSpaceLetter, "\n");
 
   beforeEditText = beforeEditText.replace(firstLetter, (p) => p.toUpperCase());
   beforeEditText = beforeEditText
     .replaceAll("Image:", "image:")
+    .replaceAll("Options=", "options=")
+    .replaceAll("Width=", "width=")
+    .replaceAll("Frame=", "frame=")
     .replaceAll("Menu:", "menu:")
     .replaceAll("Include:", "include:")
     .replaceAll("Btn:", "btn:");
