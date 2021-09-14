@@ -9,6 +9,8 @@ export function afterTranslateTextEdit(beforeEditText) {
   // const plusSpaceAfterLetter = /(?<=\n\+ )[A-Za-z]/g;
   const plusSpaceLetter = /(?<=\n\+) (?=[A-Za-z])/g;
 
+  const titleSpaceLetter = /(?<=\n\.) (?=[A-Za-z].*\n(\[|\*|image::))/g;
+
   const firstLetter =
     /^[a-z]|(?<=\n)[a-z]|(?<=\n\.)[a-z]|(?<=\n\*\s)[a-z]|(?<=\|\s)[a-z]|(?<=\|)[a-z]/g;
 
@@ -24,7 +26,7 @@ export function afterTranslateTextEdit(beforeEditText) {
 
   //
 
-  // 헤딩 첫글자 대문자화에서 전치사 제외
+  // 헤딩 단어 첫글자 대문자화에서 전치사 제외
   beforeEditText = beforeEditText
     .replaceAll(/ On /g, " on ")
     .replaceAll(/ And /g, " and ")
@@ -33,17 +35,14 @@ export function afterTranslateTextEdit(beforeEditText) {
     .replaceAll(/ For /g, " for ")
     .replaceAll(/ Through /g, " through ");
 
+  // title이 ordered list 로 변경되는 것 복구 (용어집 사용 단어가 타이틀이 될 경우 발생)
+  beforeEditText = beforeEditText.replace(titleSpaceLetter, "");
+
+  // 플러스 뒤 공백 제거
   beforeEditText = beforeEditText.replace(plusSpaceLetter, "\n");
 
+  // 문장 첫글자 대문자화
   beforeEditText = beforeEditText.replace(firstLetter, (p) => p.toUpperCase());
-  beforeEditText = beforeEditText
-    .replaceAll("Image:", "image:")
-    .replaceAll("Options=", "options=")
-    .replaceAll("Width=", "width=")
-    .replaceAll("Frame=", "frame=")
-    .replaceAll("Menu:", "menu:")
-    .replaceAll("Include:", "include:")
-    .replaceAll("Btn:", "btn:");
 
   beforeEditText = beforeEditText.replaceAll("‘", "`").replaceAll("’", "`");
   // beforeEditText = beforeEditText
@@ -52,7 +51,15 @@ export function afterTranslateTextEdit(beforeEditText) {
   //   .replaceAll("’’’’", "''''")
   //   .replaceAll("’’’", "'''");
 
+  // 문법 에러 복구
   afterEditText = beforeEditText
+    .replaceAll("Image:", "image:")
+    .replaceAll("Options=", "options=")
+    .replaceAll("Width=", "width=")
+    .replaceAll("Frame=", "frame=")
+    .replaceAll("Menu:", "menu:")
+    .replaceAll("Include:", "include:")
+    .replaceAll("Btn:", "btn:")
     .replaceAll(":imagesdir:doc", ":imagesdir: doc")
     .replaceAll(":icon_dir:image", ":icon_dir: image")
     .replaceAll(
