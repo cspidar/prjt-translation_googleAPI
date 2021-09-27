@@ -3,8 +3,7 @@ export function afterTranslateTextEdit(beforeEditText) {
   let afterEditText;
   // const headingSentence = new RegExp("^==.*");
   const headingLineNoBracket = /(?<==+.*(?<=\s))\w*/g;
-  const headingLetterAfterSpace = /(?<==+.*(?<=\s))[A-Za-z]/g;
-  // const headingLetterAfterBracket = /(?<==+.*(?<=\())[A-Za-z]/g;
+  const headingLetterAfterSpace = /(?<==+.*(?<=\s))[a-z]/g;
 
   // const plusSpaceAfterLetter = /(?<=\n\+ )[A-Za-z]/g;
   const plusSpaceLetter = /(?<=\n\+) (?=[A-Za-z])/g;
@@ -20,9 +19,6 @@ export function afterTranslateTextEdit(beforeEditText) {
   beforeEditText = beforeEditText.replace(headingLetterAfterSpace, (p) =>
     p.toUpperCase()
   );
-  // beforeEditText = beforeEditText.replace(headingLetterAfterBracket, (p) =>
-  //   p.toUpperCase()
-  // );
 
   //
 
@@ -38,7 +34,7 @@ export function afterTranslateTextEdit(beforeEditText) {
   // title이 ordered list 로 변경되는 것 복구 (용어집 사용 단어가 타이틀이 될 경우 발생)
   beforeEditText = beforeEditText.replace(titleSpaceLetter, "");
 
-  // 플러스 뒤 공백 제거
+  // 플러스 뒤 공백 -> 줄바꿈
   beforeEditText = beforeEditText.replace(plusSpaceLetter, "\n");
 
   // 문장 첫글자 대문자화

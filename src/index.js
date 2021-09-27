@@ -13,8 +13,8 @@ import {
   QGridLayout,
 } from "@nodegui/nodegui";
 import { afterTranslateTextEdit } from "./func/afterTranslateTextEdit";
-import logo from "../assets/logox200.png";
-import logo_excel from "../assets/file-excel-2-line.svg";
+import logo from "../assets/007-translation.png";
+import logo_excel from "../assets/041-conversation.png";
 
 //
 
@@ -48,55 +48,61 @@ const translationClient = new TranslationServiceClient({
   keyFilename,
 });
 async function translateTextWithGlossary() {
-  const glossaryConfig = {
-    glossary: `projects/${projectId}/locations/${location}/glossaries/${glossaryId}`,
-  };
+  try {
+    const glossaryConfig = {
+      glossary: `projects/${projectId}/locations/${location}/glossaries/${glossaryId}`,
+    };
 
-  // Construct request
-  const request = {
-    parent: `projects/${projectId}/locations/${location}`,
-    contents: [text],
-    mimeType: "text/plain", // mime types: text/plain, text/html
-    sourceLanguageCode: "ko",
-    targetLanguageCode: "en",
-    glossaryConfig: glossaryConfig,
-  };
+    // Construct request
+    const request = {
+      parent: `projects/${projectId}/locations/${location}`,
+      contents: [text],
+      mimeType: "text/plain", // mime types: text/plain, text/html
+      sourceLanguageCode: "ko",
+      targetLanguageCode: "en",
+      glossaryConfig: glossaryConfig,
+    };
 
-  // Run request
-  const [response] = await translationClient.translateText(request);
+    // Run request
+    const [response] = await translationClient.translateText(request);
 
-  async function writeFirst() {
-    for (const translation of response.glossaryTranslations) {
-      fs.writeFileSync(
-        `${dirName}/${baseName}_en${extName}`,
-        translation.translatedText,
-        {
-          encoding: "utf8",
-        }
-      );
+    async function writeFirst() {
+      for (const translation of response.glossaryTranslations) {
+        fs.writeFileSync(
+          `${dirName}/${baseName}_en${extName}`,
+          translation.translatedText,
+          {
+            encoding: "utf8",
+          }
+        );
+      }
     }
-  }
-  writeFirst();
+    writeFirst();
 
-  function editSecond() {
-    let editText = fs.readFileSync(
-      `${dirName}/${baseName}_en${extName}`,
-      "utf-8"
-    );
-    editText = afterTranslateTextEdit(editText);
-    fs.writeFileSync(`${dirName}/${baseName}_en${extName}`, editText, {
-      encoding: "utf8",
-    });
-  }
-  editSecond();
+    function editSecond() {
+      let editText = fs.readFileSync(
+        `${dirName}/${baseName}_en${extName}`,
+        "utf-8"
+      );
+      editText = afterTranslateTextEdit(editText);
+      fs.writeFileSync(`${dirName}/${baseName}_en${extName}`, editText, {
+        encoding: "utf8",
+      });
+    }
+    editSecond();
 
-  label.setText("Completed. Drag to here to translate.");
+    label.setText("Completed. Drag to here to translate.");
+  } catch (e) {
+    console.error(e);
+    label.setText("번역 실패, Glossary를 먼저 등록하세요.");
+  }
 }
 
 //
 
 //// nodegui
 const win = new QMainWindow();
+win.setWindowIcon(new QIcon(logo));
 win.setWindowTitle("Google API tanslate");
 win.setMinimumSize(340, 120);
 
@@ -388,8 +394,6 @@ win.addEventListener(WidgetEventTypes.Drop, (e) => {
       };
 
       urlTranslate();
-
-      console.log("finished");
     }
   }
 });
