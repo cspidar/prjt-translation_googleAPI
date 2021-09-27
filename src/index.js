@@ -182,7 +182,7 @@ button.addEventListener("clicked", () => {
       let beforeGlo;
       for (const glossary of response) {
         console.log(`Name: ${glossary.name}`);
-        beforeGlo = `${glossary.name}`;
+        beforeGlo += `${glossary.name}`;
         console.log(`Entry count: ${glossary.entryCount}`);
         console.log(`Input uri: ${glossary.inputConfig.gcsSource.inputUri}`);
         for (const languageCode of glossary.languageCodesSet.languageCodes) {
@@ -250,12 +250,15 @@ button.addEventListener("clicked", () => {
       label.setText("Adding...");
       const beforeGloName = await listGlossaries();
       label.setText("Check List...");
-      if (beforeGloName !== undefined && beforeGloName.includes(glossaryId)) {
+      let flag = "NO";
+      if (beforeGloName && beforeGloName.includes(glossaryId)) {
+        flag = "YES";
         await deleteGlossary();
         label.setText("Delete existing glossary...");
       }
-      console.log(beforeGloName);
+      console.log(beforeGloName[0] + beforeGloName[1] + "리스트 글로서리");
       console.log(glossaryId);
+      console.log(flag);
       await createGlossary();
       label.setText("Completed. Drag to here to translate.");
     };
@@ -370,7 +373,8 @@ win.addEventListener(WidgetEventTypes.Drop, (e) => {
             generateComponents(fullPath);
           } else if (
             path.extname(fullPath) === ".adoc" &&
-            !path.basename(fullPath).includes("_en")
+            !path.basename(fullPath).includes("_en") &&
+            !path.basename(fullPath).includes("Preface")
           ) {
             listArr.push(fullPath);
           }
