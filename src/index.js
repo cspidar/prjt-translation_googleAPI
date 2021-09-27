@@ -133,129 +133,134 @@ button.addEventListener("clicked", () => {
   const fileDialog = new QFileDialog();
   // fileDialog.setFileMode(FileMode.AnyFile);
   fileDialog.setNameFilter("Glossary file (*.csv)");
+
   fileDialog.exec();
 
-  const selectedFiles = fileDialog.selectedFiles();
-  console.log(path.dirname(selectedFiles[0].toString()));
-  //C:/Users/AA19103/Desktop
-  console.log(path.basename(selectedFiles[0].toString()));
-  //ascii_manual-ko-en.csv
-  console.log(path.extname(selectedFiles[0].toString()));
-  //.csv
+  if (path.extname(fileDialog.selectedFiles().toString()) == ".csv") {
+    const selectedFiles = fileDialog.selectedFiles();
+    console.log(path.dirname(selectedFiles[0].toString()));
+    //C:/Users/AA19103/Desktop
+    console.log(path.basename(selectedFiles[0].toString()));
+    //ascii_manual-ko-en.csv
+    console.log(path.extname(selectedFiles[0].toString()));
+    //.csv
 
-  gloDir = path.dirname(selectedFiles[0].toString());
-  gloBase = path.basename(selectedFiles[0].toString());
-  gloExt = path.extname(selectedFiles[0].toString());
+    gloDir = path.dirname(selectedFiles[0].toString());
+    gloBase = path.basename(selectedFiles[0].toString());
+    gloExt = path.extname(selectedFiles[0].toString());
 
-  function main() {
-    const filePath = `${gloDir}/${gloBase}`;
-    const destFileName = `${gloBase}`;
-    const { Storage } = require("@google-cloud/storage");
-    const storage = new Storage({ projectId, keyFilename });
-    async function uploadFile() {
-      await storage.bucket(bucketName).upload(filePath, {
-        destination: destFileName,
-      });
-      console.log(`${filePath} uploaded to ${bucketName}`);
-    }
-    uploadFile().catch(console.error);
-  }
-  main();
-
-  //
-
-  // glossary 이름 업데이트
-  glossaryId = gloBase.replace(gloExt, "");
-
-  // glossary 확인
-  async function listGlossaries() {
-    // Construct request
-    const request = {
-      parent: `projects/${projectId}/locations/${location}`,
-    };
-
-    // Run request
-    const [response] = await translationClient.listGlossaries(request);
-
-    let beforeGlo;
-    for (const glossary of response) {
-      console.log(`Name: ${glossary.name}`);
-      beforeGlo = `${glossary.name}`;
-      console.log(`Entry count: ${glossary.entryCount}`);
-      console.log(`Input uri: ${glossary.inputConfig.gcsSource.inputUri}`);
-      for (const languageCode of glossary.languageCodesSet.languageCodes) {
-        console.log(`Language code: ${languageCode}`);
+    function main() {
+      const filePath = `${gloDir}/${gloBase}`;
+      const destFileName = `${gloBase}`;
+      const { Storage } = require("@google-cloud/storage");
+      const storage = new Storage({ projectId, keyFilename });
+      async function uploadFile() {
+        await storage.bucket(bucketName).upload(filePath, {
+          destination: destFileName,
+        });
+        console.log(`${filePath} uploaded to ${bucketName}`);
       }
+      uploadFile().catch(console.error);
     }
-    // console.table(response);
-    return beforeGlo;
-  }
+    main();
 
-  async function deleteGlossary() {
-    // Construct request
-    const request = {
-      parent: `projects/${projectId}/locations/${location}`,
-      name: `projects/${projectId}/locations/${location}/glossaries/${glossaryId}`,
-    };
+    //
 
-    // Delete glossary using a long-running operation
-    const [operation] = await translationClient.deleteGlossary(request);
+    // glossary 이름 업데이트
+    glossaryId = gloBase.replace(gloExt, "");
 
-    // Wait for operation to complete.
-    const [response] = await operation.promise();
-    console.log(`Deleted glossary: ${response.name}`);
-  }
+    // glossary 확인
+    async function listGlossaries() {
+      // Construct request
+      const request = {
+        parent: `projects/${projectId}/locations/${location}`,
+      };
 
-  //
+      // Run request
+      const [response] = await translationClient.listGlossaries(request);
 
-  // glossary 생성
-  async function createGlossary() {
-    // Construct glossary
-    const glossary = {
-      languageCodesSet: {
-        languageCodes: ["ko", "en"],
-      },
-      inputConfig: {
-        gcsSource: {
-          inputUri: `gs://${bucketName}/${gloBase}`,
+      let beforeGlo;
+      for (const glossary of response) {
+        console.log(`Name: ${glossary.name}`);
+        beforeGlo = `${glossary.name}`;
+        console.log(`Entry count: ${glossary.entryCount}`);
+        console.log(`Input uri: ${glossary.inputConfig.gcsSource.inputUri}`);
+        for (const languageCode of glossary.languageCodesSet.languageCodes) {
+          console.log(`Language code: ${languageCode}`);
+        }
+      }
+      // console.table(response);
+      return beforeGlo;
+    }
+
+    async function deleteGlossary() {
+      // Construct request
+      const request = {
+        parent: `projects/${projectId}/locations/${location}`,
+        name: `projects/${projectId}/locations/${location}/glossaries/${glossaryId}`,
+      };
+
+      // Delete glossary using a long-running operation
+      const [operation] = await translationClient.deleteGlossary(request);
+
+      // Wait for operation to complete.
+      const [response] = await operation.promise();
+      console.log(`Deleted glossary: ${response.name}`);
+    }
+
+    //
+
+    // glossary 생성
+    async function createGlossary() {
+      // Construct glossary
+      const glossary = {
+        languageCodesSet: {
+          languageCodes: ["ko", "en"],
         },
-      },
-      name: `projects/${projectId}/locations/${location}/glossaries/${glossaryId}`,
-    };
+        inputConfig: {
+          gcsSource: {
+            inputUri: `gs://${bucketName}/${gloBase}`,
+          },
+        },
+        name: `projects/${projectId}/locations/${location}/glossaries/${glossaryId}`,
+      };
 
-    // Construct request
-    const request = {
-      parent: `projects/${projectId}/locations/${location}`,
-      glossary: glossary,
-    };
+      // Construct request
+      const request = {
+        parent: `projects/${projectId}/locations/${location}`,
+        glossary: glossary,
+      };
 
-    // Create glossary using a long-running operation
-    const [operation] = await translationClient.createGlossary(request);
+      // Create glossary using a long-running operation
+      const [operation] = await translationClient.createGlossary(request);
 
-    // Wait for the operation to complete
-    await operation.promise();
+      // Wait for the operation to complete
+      await operation.promise();
 
-    console.log("Created glossary:");
-    console.log(`InputUri ${request.glossary.inputConfig.gcsSource.inputUri}`);
-  }
-
-  //
-
-  // glossary 업데이트
-  const updateGlossary = async () => {
-    label.setText("Adding...");
-    const beforeGloName = await listGlossaries();
-    label.setText("Check List...");
-    if (beforeGloName !== undefined && beforeGloName.includes(glossaryId)) {
-      await deleteGlossary();
-      label.setText("Delete existing glossary...");
+      console.log("Created glossary:");
+      console.log(
+        `InputUri ${request.glossary.inputConfig.gcsSource.inputUri}`
+      );
     }
-    console.log(beforeGloName);
-    console.log(glossaryId);
-    await createGlossary();
-    label.setText("Completed. Drag to here to translate.");
-  };
-  updateGlossary();
+
+    //
+
+    // glossary 업데이트
+    const delAddGlossary = async () => {
+      label.setText("Adding...");
+      const beforeGloName = await listGlossaries();
+      label.setText("Check List...");
+      if (beforeGloName !== undefined && beforeGloName.includes(glossaryId)) {
+        await deleteGlossary();
+        label.setText("Delete existing glossary...");
+      }
+      console.log(beforeGloName);
+      console.log(glossaryId);
+      await createGlossary();
+      label.setText("Completed. Drag to here to translate.");
+    };
+    delAddGlossary();
+  }
 });
 
 //
