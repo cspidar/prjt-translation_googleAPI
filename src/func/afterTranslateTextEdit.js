@@ -11,7 +11,7 @@ export function afterTranslateTextEdit(beforeEditText) {
   const titleSpaceLetter = /(?<=\n\.) (?=[A-Za-z].*\n(\[|\*|image::))/g;
 
   const firstLetter =
-    /^[a-z]|(?<=\n)[a-z]|(?<=\n\.)[a-z]|(?<=\n\*\s)[a-z]|(?<=\|\s)[a-z]|(?<=\|)[a-z]/g;
+    /^[a-z]|(?<=\n)[a-z]|(?<=\n\.\s)[a-z]|(?<=\n\*\s)[a-z]|(?<=\n\-\s)[a-z]|(?<=\|\s)[a-z]|(?<=\|)[a-z]/g;
 
   beforeEditText = beforeEditText.replace(headingLineNoBracket, (p) =>
     p.toLowerCase()
@@ -63,23 +63,10 @@ export function afterTranslateTextEdit(beforeEditText) {
       "include::doc\\000_preface\\preface_en.adoc[]"
     )
     .replaceAll("doc.adoc[leveloffset=+1]", "doc_en.adoc[leveloffset=+1]")
-    .replaceAll(
-      ":title-page-background-image: image:./images/covers/title-bg_A5.png[]",
-      "// :title-page-background-image: image:./images/covers/title-bg_A5.png[]"
-    )
-    .replaceAll(
-      ":back-cover-image: image:./images/covers/back-cover_A5.pdf[]",
-      "// :back-cover-image: image:./images/covers/back-cover_A5.pdf[]"
-    )
-    .replaceAll(
-      "// :title-page-background-image: image:./images/covers/title-bgEN_A5.png[]",
-      ":title-page-background-image: image:./images/covers/title-bgEN_A5.png[]"
-    )
-    .replaceAll(
-      "// :back-cover-image: image:./images/covers/back-coverEN_A5.pdf[]",
-      ":back-cover-image: image:./images/covers/back-coverEN_A5.pdf[]"
-    )
     .replaceAll("<<_", "<<")
+    .replaceAll("[ ", "[")
+    .replaceAll(".png[]", "_en.png[]")
+    .replaceAll(".pdf[]", "_en.pdf[]")
     .replaceAll(`Options="header, Autowidth"`, `options="header, autowidth"`);
 
   return afterEditText;

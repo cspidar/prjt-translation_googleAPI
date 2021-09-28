@@ -377,6 +377,19 @@ win.addEventListener(WidgetEventTypes.Drop, (e) => {
             !path.basename(fullPath).includes("Preface")
           ) {
             listArr.push(fullPath);
+          } else if (path.extname(fullPath) === ".png") {
+            // 함수화 필요
+            dirName = path.dirname(fullPath).replaceAll("\\", "/");
+            extName = path.extname(fullPath);
+            baseName = path.basename(fullPath).replace(`${extName}`, "");
+            fs.copyFile(
+              fullPath,
+              `${dirName}/${baseName}_en${extName}`,
+              (err) => {
+                if (err) throw err;
+                // console.log("source.txt was copied to destination.txt");
+              }
+            );
           }
         });
       }
