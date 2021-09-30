@@ -47,8 +47,9 @@ export function afterTranslateTextEdit(beforeEditText) {
   //   .replaceAll("’’’’", "''''")
   //   .replaceAll("’’’", "'''");
 
-  // 문법 에러 복구
   afterEditText = beforeEditText
+
+    // 문법
     .replaceAll("Image:", "image:")
     .replaceAll("Options=", "options=")
     .replaceAll("Width=", "width=")
@@ -62,12 +63,14 @@ export function afterTranslateTextEdit(beforeEditText) {
       "include::doc\\000_preface\\preface.adoc[]",
       "include::doc\\000_preface\\preface_en.adoc[]"
     )
-    .replaceAll("doc.adoc[leveloffset=+1]", "doc_en.adoc[leveloffset=+1]")
     .replaceAll("<<_", "<<")
     .replaceAll("[ ", "[")
-    .replaceAll(".png[]", "_en.png[]")
-    .replaceAll(".pdf[]", "_en.pdf[]")
-    .replaceAll(`Options="header, Autowidth"`, `options="header, autowidth"`);
+    .replaceAll(`Options="header, Autowidth"`, `options="header, autowidth"`)
+
+    // 영문 번역
+    .replaceAll("doc.adoc[leveloffset=+1]", "doc_en.adoc[leveloffset=+1]")
+    .replaceAll(".png[", "_en.png[")
+    .replaceAll(".pdf[", "_en.pdf[");
 
   return afterEditText;
 }
