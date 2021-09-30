@@ -4,7 +4,7 @@ export function afterTranslateTextEdit(beforeEditText) {
 
   // const plusSpaceAfterLetter = /(?<=\n\+ )[A-Za-z]/g;
 
-  const headingLineNoBracket = /(?<==+.*(?<=\s))\w*/g;
+  const headingLineNoBracket = /(?<==+.*(?<=\s|\/))\w*/g;
   beforeEditText = beforeEditText.replace(headingLineNoBracket, (p) =>
     p.toLowerCase()
   );
@@ -62,6 +62,7 @@ export function afterTranslateTextEdit(beforeEditText) {
       "include::doc\\000_preface\\preface_en.adoc[]"
     )
     .replaceAll("<<_", "<<")
+    .replaceAll("<< ", "<<")
     .replaceAll("[ ", "[")
     .replaceAll(`Options="header, Autowidth"`, `options="header, autowidth"`)
 
