@@ -52,11 +52,13 @@ export function afterTranslateTextEdit(beforeEditText) {
     .replaceAll("Options=", "options=")
     .replaceAll("Width=", "width=")
     .replaceAll("Frame=", "frame=")
+    .replaceAll("Grid=", "grid=")
     .replaceAll("Menu:", "menu:")
     .replaceAll("Include:", "include:")
     .replaceAll("Btn:", "btn:")
     .replaceAll(":imagesdir:doc", ":imagesdir: doc")
     .replaceAll(":icon_dir:image", ":icon_dir: image")
+    .replaceAll("Grid=", "grid=")
     .replaceAll(
       "include::doc\\000_preface\\preface.adoc[]",
       "include::doc\\000_preface\\preface_en.adoc[]"
@@ -64,10 +66,18 @@ export function afterTranslateTextEdit(beforeEditText) {
     .replaceAll("<<_", "<<")
     .replaceAll("<< ", "<<")
     .replaceAll("[ ", "[")
+    .replaceAll(" ]", "]")
+    .replaceAll("( ", "(")
+    .replaceAll(" )", ")")
     .replaceAll(`Options="header, Autowidth"`, `options="header, autowidth"`)
+    .replaceAll(`Autowidth"`, `autowidth"`)
+
+    // 용어집 관련
+    /// 공백 후 마침표
+    .replace(/[a-z] \./g, `.`)
 
     // 영문 번역
-    .replaceAll("doc.adoc[leveloffset=+1]", "doc_en.adoc[leveloffset=+1]")
+    .replaceAll(".adoc[leveloffset=+1]", "_en.adoc[leveloffset=+1]")
     .replaceAll(".png[", "_en.png[")
     .replaceAll(".pdf[", "_en.pdf[");
 
